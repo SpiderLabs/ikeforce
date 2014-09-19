@@ -8,7 +8,7 @@ USAGE:
 ./ikeforce.py [target] [mode] -w /path-to/wordlist.txt [optional] -t 5 1 1 2
 Example (enum mode):
 ./ikeforce.py 192.168.1.110 -e -w groupnames.txt -s 1
-Example (enum mode):
+Example (brute mode):
 ./ikeforce.py 192.168.1.110 -b -i groupid -u dan -k psk123 -w groupnames.txt -s 1
 
 Options:

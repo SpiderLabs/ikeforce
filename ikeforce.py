@@ -611,7 +611,7 @@ if __name__ == '__main__':
                                 			#Odd length string fix/hack
                                 			hexSecret = "0" + hexSecret
 						if debug > 0:
-							print "SA_i: %s"%sSA_i
+							print "SA_i: %s"%SA_i
 							print "Secret: %s"%secret
 							print "Hexlified Secret: %s"%hexSecret
 

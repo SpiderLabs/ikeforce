@@ -50,6 +50,7 @@ class ikeCrypto(object):
 			if debug > 0:
 				print 'HASH_I: %s'%HASH_I
 			return HASH_I
+		
 
 		else:
 			print "Invalid hash type specified, value should be 'i'(initiator) or 'r'(responder)\nExiting..."
@@ -76,21 +77,80 @@ class ikeCrypto(object):
                 print "Invalid hashtype specified.\nExiting..."
                 exit()
 
+
+
     def calcHASHmcfg(self, SKEYID_a, msgID, mcfgAttr, hashType):
         ##Supply all values as raw bytes
-	if hashType == "md5" or hashType == "01":
-	        mcfgHASH = hmac.new(SKEYID_a, msgID+mcfgAttr).hexdigest()
-	        if debug > 0:
-			print 'Mode Config HASH: %s'%mcfgHASH
-        	return mcfgHASH
-	elif hashType == "sha" or hashType == "02":
+        if hashType == "md5" or hashType == "01":
+                mcfgHASH = hmac.new(SKEYID_a, msgID+mcfgAttr).hexdigest()
+                if debug > 0:
+                        print 'Mode Config HASH: %s'%mcfgHASH
+                return mcfgHASH
+        elif hashType == "sha" or hashType == "02":
                 mcfgHASH = hmac.new(SKEYID_a, msgID+mcfgAttr,hashlib.sha1).hexdigest()
                 if debug > 0:
-			print 'Mode Config HASH: %s'%mcfgHASH
+                        print 'Mode Config HASH: %s'%mcfgHASH
                 return mcfgHASH
         else:
                 print "Invalid hashtype specified.\nExiting..."
                 exit()
+
+
+
+    def calcHASHQM(self, SKEYID_a, msgID, data, hashType, hashNum):
+        ##Supply all values as raw bytes, except hashNum which is the hash number 1-3
+	#HASH(1) = prf(SKEYID_a, M-ID | SA | Ni [ | KE ] [ | IDci | IDcr )
+   	#HASH(2) = prf(SKEYID_a, M-ID | Ni_b | SA | Nr [ | KE ] [ | IDci | IDcr )
+	#HASH(3) = prf(SKEYID_a, 0 | M-ID | Ni_b | Nr_b)
+
+	if hashType == "md5" or int(hashType) == 1:
+		if hashNum == 1:
+		        qmHASH = hmac.new(SKEYID_a, msgID+data).hexdigest()
+	       		if debug > 0:
+				print 'Quick Mode HASH1: %s'%qmHASH
+        		return qmHASH
+	elif hashType == "sha" or int(hashType) == 2:
+                if hashNum == 1:
+                        qmHASH = hmac.new(SKEYID_a, msgID+data,hashlib.sha1).hexdigest()
+                        if debug > 0:
+                                print 'Quick Mode HASH1: %s'%qmHASH
+                        return qmHASH
+        if hashType == "md5" or int(hashType) == 1:
+                if hashNum == 3:
+                        qmHASH = hmac.new(SKEYID_a, "\x00"+msgID+data).hexdigest()#where data = Ni_b | Nr_b
+                        if debug > 0:
+                                print 'Quick Mode HASH3: %s'%qmHASH
+                        return qmHASH
+        elif hashType == "sha" or int(hashType) == 2:
+                if hashNum == 3:
+                        qmHASH = hmac.new(SKEYID_a, "\x00"+msgID+data,hashlib.sha1).hexdigest()#where data = Ni_b | Nr_b
+                        if debug > 0:
+                                print 'Quick Mode HASH3: %s'%qmHASH
+                        return qmHASH
+
+        else:
+                print "Invalid hashtype specified.\nExiting..."
+                exit()
+
+
+    def calcHASHgen(self, SKEYID, rawData, hashType):
+	#Generic hash generation supplying all following payloads as the data in raw bytes
+	if hashType == "md5" or hashType == "01":
+		HASH_I = hmac.new(SKEYID, rawData).hexdigest()
+		if debug > 0:
+			print 'HASH: %s'%HASH_I
+		return HASH
+		
+	elif hashType == "sha" or hashType == "02":
+		HASH = hmac.new(SKEYID, rawData,hashlib.sha1).hexdigest()
+		if debug > 0:
+			print 'HASH: %s'%HASH
+                return HASH
+
+	else:   
+                print "Invalid hashtype specified.\nExiting..."
+                exit()
+
 
     def calcSKEYID_d(self, SKEYID, rawDHShared, rawCookie_i, rawCookie_r, hashType):
         #Provide values as raw decoded hex strings
@@ -148,7 +208,7 @@ class ikeCrypto(object):
                 exit()
 
     def calcKa(self, SKEYID_e, keyLen, hashType):
-	#Calculate the encryption key for phase 2 SA
+	#Calculate the encryption key
         #Provide SKEYID_e as raw bytes and keLen as integer
 	keyLen = keyLen * 2
         if hashType == "md5" or hashType == "01":
@@ -226,7 +286,7 @@ class ikeCrypto(object):
     def calcIV(self, input1, input2, IVLen, hashType):
         #Calculate the IV for the first message of phase 2 encryption
         #Provide provide either the DH values as bytes(DHPub_i & DHPub_r) or the message ID and final bytes of previous encrypted block, length as an integer and hash type as a string (currently 'md5' or 'sha')
-        if hashType == "md5" or hashType == "01":
+        if hashType == "md5" or int(hashType) == 1:
 		iv = hashlib.md5()
 		iv.update(input1)
 		iv.update(input2)
@@ -235,7 +295,7 @@ class ikeCrypto(object):
                		print "IV: %s"%iv
 		IV = iv.decode('hex')
 
-        elif hashType == "sha" or hashType == "02":
+        elif hashType == "sha" or int(hashType) == 2:
                 iv = hashlib.sha1()
                 iv.update(input1)
                 iv.update(input2)
@@ -283,40 +343,42 @@ class ikeCrypto(object):
     def calcPadding(self, encType, data):
 	#Calculate padding required and padd supplied data with zero's
 	#Provide plain-text payload as bytes
-	if encType == "3DES-CBC" or encType == "05" or encType == 5:
-		if debug > 0:
-			print "Padding plain-text payload"
+	if encType == "3DES-CBC" or int(encType) == 5:
 		blockSize = 8
-        	padding = blockSize - len(data) % blockSize
-        	if debug > 0:
-                        print "Padding: %s"%padding
-		data = data + ("\x00" * padding)
-		return data
+        	if len(data) % blockSize != 0:
+                	padding = blockSize - len(data) % blockSize
+        	else:
+                	padding = 0
+	        data = data + ("\x00" * padding)
+	        return data
+		
 
-        if encType == "DES-CBC" or encType == "01" or encType == 1:
-                if debug > 0:
-                        print "Padding plain-text payload"
+        if encType == "DES-CBC" or int(encType) == 1:
                 blockSize = 8
-                padding = blockSize - len(data) % blockSize
-                if debug > 0:
-                        print "Padding: %s"%padding
+                if len(data) % blockSize != 0:
+                        padding = blockSize - len(data) % blockSize
+                else:
+                        padding = 0
                 data = data + ("\x00" * padding)
                 return data
 
-
-        if encType == "AES-CBC" or encType == "07" or encType == 7:
-                if debug > 0:
-                        print "Padding plain-text payload"
+        if encType == "AES-CBC" or int(encType) == 7:
                 blockSize = 16
-                padding = blockSize - len(data) % blockSize
-                if debug > 0:
-                        print "Padding: %s"%padding
+                if len(data) % blockSize != 0:
+                        padding = blockSize - len(data) % blockSize
+                else:
+                        padding = 0
                 data = data + ("\x00" * padding)
                 return data
 
 	else:
                 print "Invalid or unsupported encryption type selected\nExiting..."
+		print int(encType)
                 exit()
+
+	if debug > 0:
+		print "Padding plain-text payload to block size of: %s"%blockSize
+ 		print "Padding: %s"%padding
 
 
     def stripPadding(self, encType, data):
@@ -327,9 +389,65 @@ class ikeCrypto(object):
 	data[0:-ord(data[-1])]
 	return data
 
-    def calcKEYMAT(SKEYID_d, rawProtocol, rawSPI, rawNonce_i, rawNonce_r):	
-	#***add pfs keymat - with pfs enabled: KEYMAT = prf(SKEYID_d, g(qm)^xy | protocol | SPI | Ni_b | Nr_b)
-	return
+    def calcKEYMAT(self, hashType, keyLen, SKEYID_d, prot, SPI, nonce_i, nonce_r, *arg):
+	#Provide all values as raw bytes, if PFS is required provide the new shared secret as the 8th argument otherwise don't
+	#KEYMAT = prf(SKEYID_d, protocol | SPI | Ni_b | Nr_b).
+	keyLen = keyLen*2 # using hex strings instead of bytes
+	try:
+		arg[0]
+		print "PFS Enabled, using new shared secret"
+                if hashType == "md5" or int(hashType) == 1:
+                        keymat = hmac.new(SKEYID_d, arg+prot+SPI+nonce_i+nonce_r).hexdigest()
+                        if debug > 0:
+                                print 'Phase 2 Key: %s'%keymat
+                elif hashType == "sha" or int(hashType) == 2:
+                        keymat = hmac.new(SKEYID_d, arg+prot+SPI+nonce_i+nonce_r, hashlib.sha1).hexdigest()
+                        if debug > 0:
+                                print 'Phase 2 Key: %s'%keymat
+                else:
+                        print "Invalid hash type specified"
+
+	except:
+		if hashType == "md5" or int(hashType) == 1:
+			keymat = hmac.new(SKEYID_d, prot+SPI+nonce_i+nonce_r).hexdigest()
+        	elif hashType == "sha" or int(hashType) == 2:
+                	keymat = hmac.new(SKEYID_d, prot+SPI+nonce_i+nonce_r, hashlib.sha1).hexdigest()
+		else:
+			print "Invalid hash type specified"
+		#keyLen = keyLen/8
+		if debug > 0:
+			print "Key Length: %s (bytes)"%keyLen
+		###***make this a method
+		if len(keymat.decode('hex')) < keyLen:
+			k1 = keymat
+			k2 = hmac.new(SKEYID_d, k1.decode('hex')).hexdigest()
+        		ka = k1+k2
+			if debug > 0:
+        	        	print "K2: %s"%k2
+        	        if len(ka.decode('hex')) < keyLen:
+        	                k3 = hmac.new(SKEYID_d, k2.decode('hex')).hexdigest()
+                        	if debug > 0:
+                                	print "K3: %s"%k3
+				ka = k1+k2+k3
+				ka = ka[:keyLen]
+				if debug > 0:
+					print "Ka (Encryption Key):: %s"%ka
+				keymat = ka.decode('hex')
+
+			else:
+				ka = ka[:keyLen]
+				if debug > 0:
+	       		         	print "Ka (Encryption Key): %s"%ka
+				keymat = ka.decode('hex')
+		
+		else:
+			ka = keymat[:keyLen]
+			if debug > 0:
+				print "Ka (Encryption Key): %s"%ka
+			keymat = ka.decode('hex')
+	if debug > 0:
+		print 'Phase 2 Key: %s'%keymat.encode('hex')
+	return keymat
 
 def main():
 	#Declare static values for testing
@@ -390,7 +508,14 @@ def main():
 	SKEYID_d = testCrypt.calcSKEYID_d(SKEYID, rawDHShared, rawCookie_i, rawCookie_r, hashType)
 	SKEYID_a = testCrypt.calcSKEYID_a(SKEYID, SKEYID_d, rawDHShared, rawCookie_i, rawCookie_r, hashType)
 	SKEYID_e = testCrypt.calcSKEYID_e(SKEYID, SKEYID_a, rawDHShared, rawCookie_i, rawCookie_r, hashType)
-	#KEYMAT = testCrypt.calcKEYMAT(SKEYID_d, rawDHShared, protocol, SPI, rawNonce_i, rawNonce_r)
+	#KEYMAT = testCrypt.calcKEYMAT(SKEYID_d, rawDHShared, protocol, SPI, raw		
+	"""
+		HASH(1) = prf(SKEYID_a, M-ID | SA | Ni [ | KE ] [ | IDci | IDcr )
+		   HASH(2) = prf(SKEYID_a, M-ID | Ni_b | SA | Nr [ | KE ] [ | IDci |
+		   IDcr )
+		   HASH(3) = prf(SKEYID_a, 0 | M-ID | Ni_b | Nr_b)
+	"""
+
 	encKey = testCrypt.calcKa(SKEYID_e, keyLen, hashType)
 	initIV = testCrypt.calcIV(rawDHPub_i, rawDHPub_r, IVLen, hashType)
 	curIV = testCrypt.calcIV(lastBlock.decode('hex'), msgID.decode('hex'), IVLen, hashType)

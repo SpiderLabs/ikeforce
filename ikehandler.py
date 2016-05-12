@@ -10,7 +10,7 @@ import sys
 import crypto
 
 #IKE/ISAKMP packet handler classes
-
+#Declare global dictionary and list for VIDs and crypto operations
 dicCrypto = {}
 listVIDs = []
 
@@ -26,31 +26,37 @@ class IKEv1Handler(object):
     dicDHGroup = {'0':'Reserved','1':'default 768-bit MODP group','2':'alternate 1024-bit MODP group','3':'EC2N group on GP[2^155]','4':'EC2N group on GP[2^185]','5':'1536-bit MODP group','6':'EC2N group over GF[2^163](see Note)','7':'EC2N group over GF[2^163](see Note)','8':'EC2N group over GF[2^283](see Note)','9':'EC2N group over GF[2^283](see Note)','10':'EC2N group over GF[2^409](see Note)','11':'EC2N group over GF[2^409](see Note)','12':'EC2N group over GF[2^571](see Note)','13':'EC2N group over GF[2^571](see Note)','14':'2048-bit MODP group','15':'3072-bit MODP group','16':'4096-bit MODP group','17':'6144-bit MODP group','18':'8192-bit MODP group','19':'256-bit random ECP group','20':'384-bit random ECP group','21':'521-bit random ECP group','22':'1024-bit MODP Group with 160-bit Prime Order Subgroup','23':'2048-bit MODP Group with 224-bit Prime Order Subgroup','24':'2048-bit MODP Group with 256-bit Prime Order Subgroup','25':'192-bit Random ECP Group','26':'224-bit Random ECP Group','27':'224-bit Brainpool ECP group','28':'256-bit Brainpool ECP group','29':'384-bit Brainpool ECP group','30':'512-bit Brainpool ECP group'}
     dicLType = {'1':'seconds','2':'kilobytes'}
     dicIDType = {'0':'ID_IPV4_ADDR','1': 'ID_IPV4_ADDR_SUBNET','2':'ID_IPV6_ADDR','3':'ID_IPV6_ADDR_SUBNET','36136':'R-U-THERE','36137':'R-U-THERE-ACK'}
-    dicNotType = {'1':'INVALID-PAYLOAD-TYPE','2':'DOI-NOT-SUPPORTED','3':'SITUATION-NOT-SUPPORTED','4':'INVALID-COOKIE','5':'INVALID-MAJOR-VERSION','6':'INVALID-MINOR-VERSION','7':'INVALID-EXCHANGE-TYPE','8':'INVALID-FLAGS','9':'INVALID-MESSAGE-ID','10':'INVALID-PROTOCOL-ID','11':'INVALID-SPI','12':'INVALID-TRANSFORM-ID','13':'ATTRIBUTES-NOT-SUPPORTED','14':'NO-PROPOSAL-CHOSEN','15':'BAD-PROPOSAL-SYNTAX','16':'PAYLOAD-MALFORMED','17':'INVALID-KEY-INFORMATION','18':'INVALID-ID-INFORMATION','19':'INVALID-CERT-ENCODING','20':'INVALID-CERTIFICATE','21':'CERT-TYPE-UNSUPPORTED','22':'INVALID-CERT-AUTHORITY','23':'INVALID-HASH-INFORMATION','24':'AUTHENTICATION-FAILED','25':'INVALID-SIGNATURE','26':'ADDRESS-NOTIFICATION','27':'NOTIFY-SA-LIFETIME','28':'CERTIFICATE-UNAVAILABLE','29':'UNSUPPORTED-EXCHANGE-TYPE','30':'UNEQUAL-PAYLOAD-LENGTHS'}
+    dicNotType = {'1':'INVALID-PAYLOAD-TYPE','2':'DOI-NOT-SUPPORTED','3':'SITUATION-NOT-SUPPORTED','4':'INVALID-COOKIE','5':'INVALID-MAJOR-VERSION','6':'INVALID-MINOR-VERSION','7':'INVALID-EXCHANGE-TYPE','8':'INVALID-FLAGS','9':'INVALID-MESSAGE-ID','10':'INVALID-PROTOCOL-ID','11':'INVALID-SPI','12':'INVALID-TRANSFORM-ID','13':'ATTRIBUTES-NOT-SUPPORTED','14':'NO-PROPOSAL-CHOSEN','15':'BAD-PROPOSAL-SYNTAX','16':'PAYLOAD-MALFORMED','17':'INVALID-KEY-INFORMATION','18':'INVALID-ID-INFORMATION','19':'INVALID-CERT-ENCODING','20':'INVALID-CERTIFICATE','21':'CERT-TYPE-UNSUPPORTED','22':'INVALID-CERT-AUTHORITY','23':'INVALID-HASH-INFORMATION','24':'AUTHENTICATION-FAILED','25':'INVALID-SIGNATURE','26':'ADDRESS-NOTIFICATION','27':'NOTIFY-SA-LIFETIME','28':'CERTIFICATE-UNAVAILABLE','29':'UNSUPPORTED-EXCHANGE-TYPE','30':'UNEQUAL-PAYLOAD-LENGTHS', '24576': 'STATUS_RESP_LIFETIME', '36136':'R-U-THERE','36137':'R-U-THERE-ACK'}
     dicMCFGType = {'0':'RESERVED','1':'ISAKMP_CFG_REQUEST','2':'ISAKMP_CFG_REPLY','3':'ISAKMP_CFG_SET','4':'ISAKMP_CFG_ACK','5-127':'Reserved for Future Use','128-255':'Reserved for Private Use'}
     dicMCFGAtt = {'0':'RESERVED','1':'INTERNAL_IP4_ADDRESS','2':'INTERNAL_IP4_NETMASK','3':'INTERNAL_IP4_DNS','4':'INTERNAL_IP4_NBNS','5':'INTERNAL_ADDRESS_EXPIRY','6':'INTERNAL_IP4_DHCP','7':'APPLICATION_VERSION','13':'INTERNAL_IP4_SUBNET','14':'SUPPORTED_ATTRIBUTES'}#missing ipv6 values
     dicXAUTHAtts = {'16520':'XAUTH_TYPE','16521':'XAUTH_USER_NAME','16522':'XAUTH_USER_PASSWORD','16523':'XAUTH_PASSCODE','16524':'XAUTH_MESSAGE','16525':'XAUTH_CHALLENGE','16526':'XAUTH_DOMAIN','16527':'XAUTH_STATUS'}
     dicXAUTHTypes = {'0':'Generic','1':'RADIUS-CHAP','2':'OTP','3':'S/KEY','4-32767':'Reserved for future use','32768-65535':'Reserved for private use'}
-
+    dicIDESP = {'0':'Reserved','1':'ENCR_DES_IV64','2':'ENCR_DES','3':'ENCR_3DES','4':'ENCR_RC5','5':'ENCR_IDEA','6':'ENCR_CAST','7':'ENCR_BLOWFISH','8':'ENCR_3IDEA','9':'ENCR_DES_IV32','10':'Reserved','11':'ENCR_NULL','12':'ENCR_AES_CBC','13':'ENCR_AES_CTR','14':'ENCR_AES-CCM_8','15':'ENCR-AES-CCM_12','16':'ENCR-AES-CCM_16','17':'Unassigned'}
+    dicAttsESP = {'0':'Reserved','1':'SA Life Type','2':'SA Life Duration','3':'Group Description','4':'Encapsulation Mode','5':'Authentication Algorithm','6':'Key Length','7':'Key Rounds'}
+    dicEncModeTypeESP = {'0':'Reserved', '1':'Tunnel', '2':'Transport'}
+    dicATypeESP = {'0':'Reserved', '1':'HMAC-MD5', '2':'HMAC-SHA', '3':'DES-MAC', '4':'KPDK'}
+    dicCertType = {'0':'NONE','1':'PKCS7 wrapped X.509 certificate','2':'PGP Certificate','3':'DNS Signed Key','4':'X.509 Certificate - Signature','5':'X.509 Certificate - Key Exchange','6':'Kerberos Tokens','7':'Certificate Revocation List CRL','8':'Authority Revocation List ARL','9':'SPKI Certificate','10':'X.509 Certificate - Attribute'}
     retData = [] #List of data to return, things required for future crypto
 
     def __init__(self,debug):
         self.debug = debug
 
-    def transformCalculations(self, hexPacket, prevPayLen):
+    def transformCalculations(self, hexPacket, payLen, phase):
 	transAtts = []
-	###***This method needs to be cleaned up
-	numAtts = prevPayLen + 56#56 = sa and proposal payloads + transform payload header, static value for now but may need to be dynamic if these are variable length which I don't think they are
-        transAtts.append(hexPacket[numAtts:numAtts+8])
-	payLen = int(hexPacket[prevPayLen+44:prevPayLen+48],16)
-	finByte = numAtts - 16  + payLen*2# 16 is the length of the transform payload header (8 bytes)
+	numAtts = 0 # 16 (8 bytes) = transform header length
+	finByte = payLen
 	#Check the type of value (fixed or long unsigned), fixed byte length or a non-fixed value
+	atts = {}
 	while numAtts < finByte:
-		for i in xrange(0,16):#16 is the limit set in the IKE RFC but this is not explicitly followed by all vendors
+		###***add whilte paynext != 0 here?
 			if hexPacket[numAtts:numAtts+2] == "80":
+				###***should be able to remove this list and just go with the dictionary only
 				transAtts.append(hexPacket[numAtts:numAtts+8])
 				if self.debug > 0:
 					print "Value type has fixed size"
+	                        attType = int(hexPacket[numAtts+2:numAtts+4],16)
+                        	attValue = int(hexPacket[numAtts+4:numAtts+8],16)
+                        	atts[attType] = attValue
 				numAtts += 8
 
 			elif hexPacket[numAtts:numAtts+2] == "00":
@@ -60,107 +66,212 @@ class IKEv1Handler(object):
                                 if self.debug > 0:
                                         print "Value type not fixed"
                                         print "Transform length: %s"%transLen	
-				numAtts += 8 + (transLen * 2)
+	                        attType = int(hexPacket[numAtts+2:numAtts+4],16)
+	                        attLen = int(hexPacket[numAtts+4:numAtts+8],16)*2
+	                        attValue = hexPacket[numAtts+8:numAtts+8+attLen]
+	                        atts[attType] = attValue
+				numAtts = numAtts + (transLen * 2) + 8# 8 = attributes header
 			else:
-				if self.debug > 0:
-					print "End of transform set"
+				try:
+					payNext = int(hexPacket[numAtts:numAtts+2],16)
+					if payNext == 3:
+						numAtts = numAtts+16  # 16 = transform header
+					
+					if self.debug > 0:
+						print "End of transform set"
+						break
+				except:
+                                        if self.debug > 0:
+                                                print "End of transform set"
 					break
 
+				else:
+					break
+
+								
 
         #Find number of transforms, parse them and add them to a human readable dictionary for later use
-	###***There is duplication here this next bit can probably be removed and processed in the above loop
         numTrans = len(transAtts)
-	if self.debug > 0:
-                print "Transforms attributes to process: %s"%numTrans
-		print "Full Transforms dictionary: %s"%transAtts
-	atts = {}
-	for i in xrange(0,numTrans):
-		if transAtts[i][0:2] == "80":
-			attType = int(transAtts[i][2:4],16)
-			attValue = int(transAtts[i][4:8],16)
-			atts[attType] = attValue
-		elif transAtts[i][0:2] == "00":
-			attType = int(transAtts[i][2:4],16)
-			attLen = int(transAtts[i][4:8],16)*2
-                        attValue = int(transAtts[i][8:8+attLen],16)
-                        atts[attType] = attValue
-		else:
-			print "Invalid transform attribute, something went wrong"
-			exit()
 	attDict = {}
 	#Process the transform according to it's attribute class/type
-	for i in atts:
-		att = atts[i]
-		attType = self.dicAtts[str(i)]
-		if attType == "Encryption Algorithm":
-			attValue = self.dicEType[str(att)]
-			attDict[attType] = attValue
-			if self.debug > 0:
-                                print "%s : %s"%(attType,attValue)
-			pass
-		elif attType == "Hash Algorithm":
-                        attValue = self.dicHType[str(att)]
-                        attDict[attType] = attValue
-                        if self.debug > 0:
-                                print "%s : %s"%(attType,attValue)
-			pass
-                elif attType == "Authentication Method":
-                        attValue = self.dicAType[str(att)]
-                        attDict[attType] = attValue
-                        if self.debug > 0:
-                                print "%s : %s"%(attType,attValue)
-                        pass
-                elif attType == "Group Description":
-                        attValue = self.dicDHGroup[str(att)]
-                        attDict[attType] = attValue
-                        if self.debug > 0:
-                                print "%s : %s"%(attType,attValue)
-                        pass
-                elif attType == "Life Type":
-                        attValue = self.dicLType[str(att)]
-                        attDict[attType] = attValue
-                        if self.debug > 0:
-                                print "%s : %s"%(attType,attValue)
-                        pass
-                elif attType == "Life Duration":
-                        attDict[attType] = att
-                        if self.debug > 0:
-                                print "%s : %s"%(attType,att)
-                        pass
-		elif attType == "Key Length":
-			attDict[attType] = att
-			if self.debug > 0:
-				print "%s : %s"%(attType,att)
-			pass
-		else:
-			if self.debug > 0:
-				print "Unsupported Transform attribute type received. Continuing anyway...\n"
+	if phase == 1:
+		for i in atts:
+			att = atts[i]
+			attType = self.dicAtts[str(i)]
+			if attType == "Encryption Algorithm":
+				attValue = self.dicEType[str(att)]
+				attDict[attType] = attValue
+				if self.debug > 0:
+                	                print "%s : %s"%(attType,attValue)
+				pass
+			elif attType == "Hash Algorithm":
+				try:
+	        	                attValue = self.dicHType[str(att)]
+				except:
+					attValue = str(att)
+                        	attDict[attType] = attValue
+                        	if self.debug > 0:
+                        	        print "%s : %s"%(attType,attValue)
+				pass
+                	elif attType == "Authentication Method":
+                	        attValue = self.dicAType[str(att)]
+                	        attDict[attType] = attValue
+                	        if self.debug > 0:
+                        	        print "%s : %s"%(attType,attValue)
+                        	pass
+                	elif attType == "Group Description":
+                	        attValue = self.dicDHGroup[str(att)]
+                	        attDict[attType] = attValue
+                	        if self.debug > 0:
+                	                print "%s : %s"%(attType,attValue)
+                	        pass
+                	elif attType == "Life Type":
+                	        attValue = self.dicLType[str(att)]
+                	        attDict[attType] = attValue
+                	        if self.debug > 0:
+                	                print "%s : %s"%(attType,attValue)
+                	        pass
+			elif attType == "Group Prime/Irreducible Polynomial":
+                	        attDict[attType] = att
+                        	if self.debug > 0:
+                                	print "%s : %s"%(attType,att)
+                        	pass
 
+                	elif attType == "Life Duration":
+                	        attDict[attType] = att
+                	        if self.debug > 0:
+                	                print "%s : %s"%(attType,att)
+                	        pass
+			elif attType == "Key Length":
+				attDict[attType] = att
+				if self.debug > 0:
+					print "%s : %s"%(attType,att)
+				pass
+			else:
+				if self.debug > 0:
+					print "Unsupported Transform attribute type received. Continuing anyway...\n"
+	elif phase == 2:
+                for i in atts:
+                        att = atts[i]
+                        attType = self.dicAttsESP[str(i)]
+                        if attType == "SA Life Type":
+                                attDict[attType] = att
+                                if self.debug > 0:
+                                        print "%s : %s"%(attType,att)
+				pass
+			elif attType == "SA Life Duration":
+                                attDict[attType] = att
+                                if self.debug > 0:
+                                        print "%s : %s"%(attType,att)
+                                pass
+                        elif attType == "Group Description":
+                                attDict[attType] = att
+                                if self.debug > 0:
+                                        print "%s : %s"%(attType,att)
+                                pass
+                        elif attType == "Encapsulation Mode":
+                                attValue = self.dicEncModeTypeESP[str(att)]
+                                attDict[attType] = attValue
+                                if self.debug > 0:
+                                        print "%s : %s"%(attType,attValue)
+                                pass
+                        elif attType == "Authentication Algorithm":
+                                attValue = self.dicATypeESP[str(att)]
+                                attDict[attType] = attValue
+                                if self.debug > 0:
+                                        print "%s : %s"%(attType,attValue)
+                                pass
+                        elif attType == "Key Length":
+                                attDict[attType] = att
+                                if self.debug > 0:
+                                        print "%s : %s"%(attType,att)
+                                pass
+                        elif attType == "Key Rounds":
+                                attDict[attType] = att
+                                if self.debug > 0:
+                                        print "%s : %s"%(attType,att)
+                                pass
+                        elif attType == "Compress Dictionary Size":
+                                attDict[attType] = att
+                                if self.debug > 0:
+                                        print "%s : %s"%(attType,att)
+                                pass
+                        elif attType == "Compress Private Algorithm":
+                                attDict[attType] = att
+                                if self.debug > 0:
+                                        print "%s : %s"%(attType,att)
+                                pass
+
+                        else:
+                                if self.debug > 0:
+                                        print "Unsupported Transform attribute type received. Continuing anyway...\n"
+		
 	return attDict,finByte
 
-    def transformParsing(self, hexPacket, prevPayLen, propTrans, saPayLen, saFinByte):
+    def transformParsing(self, hexPacket, propTrans, propHdrSize, phase):
 	#Requires hex packet data, previous payload length, the length up to the end of the last payload processed, number of transforms to process, 
-        payNext = int(hexPacket[prevPayLen+40:prevPayLen+42],16) #padded an extra 2 bytes (reserved space
-        payLen = int(hexPacket[prevPayLen+44:prevPayLen+48],16)
-	transNum = hexPacket[prevPayLen+48:prevPayLen+50]
-        transId = hexPacket[prevPayLen+50:prevPayLen+52]
-	padding = hexPacket[prevPayLen+52:prevPayLen+56]#padded 4 bytes to +16
-
+        payNext = int(hexPacket[:2],16) #padded an extra 2 bytes (reserved space)
+        payLen = int(hexPacket[4:8],16)
+        transNum = hexPacket[8:10]
+        transId = hexPacket[10:12]
+        padding = hexPacket[12:16]#padded 4 bytes to +16
+	finByte = (payLen*2)# + 16 # 16 = transform payload header 
+	transPayload = hexPacket[propHdrSize+16:finByte]#40 = proposal header + transform header
         if self.debug > 0:
 		print "Parsing Transform Payloads:"
                 print "Next Payload: %s"%self.dicPayloads[str(payNext)]
                 print "Payload Length: %s"%payLen
                 print "Transform Number: %s"%transNum
-                print "Transform ID: %s"%transId
+		if phase == 2:
+			print "Transform ID: %s"%self.dicIDESP[str(int(transId, 16))]
+		elif phase == 1:
+	                print "Transform ID: %s"%transId
 
-	for i in range(1,propTrans+1):
-                if self.debug > 0:
-                        print "Parsing Transform Set %s:"%i
-		transCalc = self.transformCalculations(hexPacket, prevPayLen) #sa payload length plus 4 bytes of padding is where the transform payload begins?# + 12 bytes for the proposal header, not sure if this will cover all scenarios
+	lenTrans = finByte
+	transCalc = self.transformCalculations(transPayload, finByte, phase)
+	if phase == 2:
+		transCalc[0]["Encryption Type"] = self.dicIDESP[str(int(transId, 16))]
+	return transCalc, lenTrans, payNext#dictionary of accepted transform set and final byte of the proposal/transform payload
 
-	#need these to do every transform, at the moment only processes the first over and over
-	return transCalc #dictionary of accepted transform set and final byte of the proposal/transform payload
     
+    def parseProposal(self, hexPacket, phase):
+        #Process the proposal header
+	#this method needs to be fed only the proposal payload with no sa header
+        payNext = int(hexPacket[:2],16)#Padding 2 bytes after this (reserved space)
+        payLen = int(hexPacket[4:8],16)
+        propNum = hexPacket[8:10]
+        protId = int(hexPacket[10:12], 16)
+        spiSize = int(hexPacket[12:14],16)
+        propTrans = int(hexPacket[14:16],16)
+	if spiSize != 0:
+        	spi = hexPacket[16:16+(spiSize*2)]
+	else:
+		spi = 0
+        hdrfinByte = 16 + (spiSize*2) #header plus spi payload
+        if self.debug > 0:
+                print "Parsing Proposal Payload:"
+                print "Next Payload: %s"%self.dicPayloads[str(payNext)]
+                print "Payload Length: %s"%payLen
+                print "Proposal Number: %s"%int(propNum, 16)
+		print "Protocol ID: %s"%protId
+                print "SPI Size: %s"%spiSize
+                print "Proposal Transforms: %s"%propTrans
+                print "SPI: %s\n"%spi
+
+	SA = self.transformParsing(hexPacket, propTrans, hdrfinByte, phase)
+        transform = SA[0]
+	###***tidy this lot up a bit, eventually remove most of the finByte crap
+	finByte = (payLen*2)
+	
+	if int(protId) == 3:
+		phase = 2
+	else:
+		phase = 1
+	
+	if phase == 2:
+	        return payNext,transform,propTrans,hdrfinByte,spi,finByte
+	elif phase == 1:
+		return payNext,transform,propTrans,hdrfinByte,finByte
 
     def parseHeader(self,hexPacket):
         #IKE HDR 28 bytes
@@ -189,43 +300,93 @@ class IKEv1Handler(object):
 
 	return payNext,iCookie,rCookie,version,xType,msgID,payLen,flags,finByte
 
-    def parseSA(self, hexPacket, prevPayLen):
+    def parseSA(self, hexPacket, phase):
         #Process SA payload
-	#Requires hexlified packet and previous payload length as a starting point for the current payload
+	#Requires hexlified whole SA payload including header and which phase we are negotiating
         #Begin with the SA header
-	saPayNext = int(hexPacket[prevPayLen:prevPayLen+2], 16) #Padding 2 bytes after this (reserved space)
-        saPayLen = int(hexPacket[prevPayLen+4:prevPayLen+8], 16)
-        doi = hexPacket[prevPayLen+8:prevPayLen+16]
-        sit = hexPacket[prevPayLen+16:prevPayLen+24]
-	saFinByte = saPayLen + prevPayLen
-
+	payNext = int(hexPacket[:2], 16) #Padding 2 bytes after this (reserved space)
+        payLen = int(hexPacket[4:8], 16)
+        doi = hexPacket[8:16]
+        sit = hexPacket[16:24]
+	fullSAPayload = hexPacket[:payLen*2]
 	if self.debug > 0:
 		print "Parsing SA payload:"
-		print "Next Payload: %s"%self.dicPayloads[str(saPayNext)]
+		print "Next Payload: %s"%self.dicPayloads[str(payNext)]
+		print "Payload length: %s"%payLen
                 print "Domain of Interpretation: %s"%doi
                 print "Situation: %s"%sit
-		print "Full SA Payload: %s\n"%hexPacket[prevPayLen:prevPayLen+(saPayLen*2)]
+		print "Full SA Payload: %s\n"%fullSAPayload
+	fullPropPayload = fullSAPayload[24:] #minus SA header
+	ikeProp = self.parseProposal(fullPropPayload, phase)
+	payNextSA = payNext
+	payNext = ikeProp[0]
+	transform = ikeProp[1]
+	propTrans = ikeProp[2]
+	if phase == 1:
+		propHdrSize = ikeProp[-2]
+	elif phase == 2:
+		propHdrSize = ikeProp[-3]
+		spi = ikeProp[-2]
+	###**this bit could be written better, can't remember if the extra 24 in phase 1 is the sa header?
+	if phase == 1:
+		finByte = payLen*2 + propHdrSize + 16 + 24
+		return payNextSA,payNext,transform,payLen,finByte
+	elif phase ==2:
+		finByte = propHdrSize + ikeProp[-1]
+		return payNextSA,payNext,transform,payLen,spi,finByte
 
-	#Then process the proposal header
-        propPayNext = int(hexPacket[prevPayLen+24:prevPayLen+26],16)#Padding 2 bytes after this (reserved space)
-        propPayLen = int(hexPacket[prevPayLen+28:prevPayLen+32],16)
-        propNum = hexPacket[prevPayLen+32:prevPayLen+34]
-        protId = hexPacket[prevPayLen+34:prevPayLen+36]
-        spiSize = hexPacket[prevPayLen+36:prevPayLen+38]
-        propTrans = int(hexPacket[prevPayLen+38:prevPayLen+40],16)
 
-        #Finally process the Transform payload
-        SA = self.transformParsing(hexPacket, prevPayLen, propTrans, saPayLen, saFinByte)#use sa payload length plus 4 bytes of pad as starting point for the transform attributes?
-        transform = SA[0]
-        finByte = SA[-1]
+    def parseCR(self,hexPacket,prevPayLen):  
+        #Process Certificate Request payload
+        #Requires hexlified packet and previous payload length as a starting point for the current payload
+        payNext = int(hexPacket[prevPayLen:prevPayLen+2], 16)#Padding with 2 bytes (reserved space)
+        payLen = int(hexPacket[prevPayLen+4:prevPayLen+8], 16)
+	cType = hexPacket[prevPayLen+8:prevPayLen+10]
+        caData = hexPacket[prevPayLen+10:prevPayLen+(payLen * 2)] 
+        finByte = prevPayLen + (payLen * 2)
 
         if self.debug > 0:
-                print "Parsing Proposal Payload:"
-                print "Next Payload: %s"%self.dicPayloads[str(propPayNext)]
-                print "Payload Length: %s"%propPayLen
-                print "SPI Size: %s"%spiSize
-                print "Proposal Transforms: %s\n"%propTrans
-	return saPayNext,transform,saPayLen,finByte
+                print "Parsing Certificate Request Payload:"
+                print "Next Payload: %s"%self.dicPayloads[str(payNext)]
+                print "Payload Length: %s"%payLen
+                print "Certificate Type: %s (%s)"%(cType,self.dicCertType[str(int(cType))])
+		print "Certificate Authority: %s\n"%caData
+        return payNext,cType,caData,payLen,finByte
+
+
+    def parseC(self,hexPacket,prevPayLen):
+        #Process Certificate payload
+        #Requires hexlified packet and previous payload length as a starting point for the current payload
+        payNext = int(hexPacket[prevPayLen:prevPayLen+2], 16)#Padding with 2 bytes (reserved space)
+        payLen = int(hexPacket[prevPayLen+4:prevPayLen+8], 16)
+        cType = hexPacket[prevPayLen+8:prevPayLen+10]
+        caData = hexPacket[prevPayLen+10:prevPayLen+(payLen * 2)]
+        finByte = prevPayLen + (payLen * 2)
+
+        if self.debug > 0:
+                print "Certificate Request  Payload:"
+                print "Next Payload: %s"%self.dicPayloads[str(payNext)]
+                print "Payload Length: %s"%payLen
+                print "Certificate Type: %s\n"%cType 
+                print "Certificate Authority: %s\n"%caData
+        return payNext,cType,caData,payLen,finByte
+
+
+
+    def parseSig(self,hexPacket,prevPayLen):
+        #Process Signature payload
+        #Requires hexlified packet and previous payload length as a starting point for the current payload
+        payNext = int(hexPacket[prevPayLen:prevPayLen+2], 16)#Padding with 2 bytes (reserved space)
+        payLen = int(hexPacket[prevPayLen+4:prevPayLen+8], 16)
+        sigData = hexPacket[prevPayLen+10:prevPayLen+(payLen * 2)]
+        finByte = prevPayLen + (payLen * 2)   
+
+        if self.debug > 0:
+                print "Parsing Signature Payload:"
+                print "Next Payload: %s"%self.dicPayloads[str(payNext)]
+                print "Payload Length: %s"%payLen
+                print "Signature Data: %s\n"%sigData
+        return payNext,sigData,payLen,finByte
 
 
     def parseKE(self,hexPacket,prevPayLen):
@@ -259,7 +420,7 @@ class IKEv1Handler(object):
 
 	return payNext,nonce,payLen,finByte
 
-    def IDProcessing(self,hexPacket,prevPayLen):
+    def parseID(self,hexPacket,prevPayLen):
         #Process ID payload
         #Requires hexlified packet and previous payload length as a starting point for the curr
         payNext = int(hexPacket[prevPayLen:prevPayLen+2], 16)#Padding with 2 bytes (reserved space)
@@ -274,7 +435,10 @@ class IKEv1Handler(object):
                 print "Parsing ID Payload:"
                 print "Next Payload: %s"%self.dicPayloads[str(payNext)]
                 print "Payload Length: %s"%payLen
-                print "ID Type: %s"%self.dicIDType[str(int(IDtype,16))]
+		try:
+	                print "ID Type: %s (%s)"%(self.dicIDType[str(int(IDtype,16))],int(IDtype,16))
+		except:
+			print "ID Type: %s"%int(IDtype,16)
                 print "ID Data: %s\n"%IDdata
 		
 	ID_r = IDtype+IDprot+port+IDdata
@@ -299,11 +463,39 @@ class IKEv1Handler(object):
 
         return payNext,hashData,payLen,finByte
 
+    def parseQMHash(self,hexPacket,hashType):
+        #Process Quick Mode Hash payload
+	#payNext = 1
+        payNext = int(hexPacket[prevPayLen:prevPayLen+2], 16)#Padding with 2 bytes (reserved space)
+        payLen = int(hexPacket[prevPayLen+4:prevPayLen+8], 16)
+	if hashType == "md5":
+        	hashData = hexPacket[:32]
+        	finByte = 32
+        elif hashType == "sha":
+                hashData = hexPacket[:40]
+                finByte = 40
+	else:
+		print "Unsupported hash type. Exiting..."
+		exit()
+
+
+        if self.debug > 0:
+                print "Parsing Hash Payload:"
+                try:
+                        print "Next Payload: %s"%self.dicPayloads[str(int(payNext,16))]
+                except:
+                        print "Next Payload: %s"%self.dicPayloads[str(payNext)]
+                print "Payload Length: %s"%payLen
+                print "Hash Data: %s\n"%hashData
+
+        return payNext,hashData,finByte
+
+
     def parseXAUTH(self, hexPacket, firstByte, finByte):
 	attsXAUTH = {}
 	atts = firstByte
 	if self.debug > 0:
-		print "XAUTH Payload: %s"%hexPacket[firstByte:]
+		print "Mode CFG Payload: %s"%hexPacket[firstByte:]
         while atts < finByte:
 		#Parse attribute type and length then store type and value as dictionary 
 		attXAUTH = hexPacket[atts:atts+4]
@@ -323,6 +515,22 @@ class IKEv1Handler(object):
                         elif attXAUTH == 16527 and attXAUTHValue == 1:
 				if self.debug > 0:
 	                                print "XAUTH Authentication Successful"
+
+		elif attXAUTH == 16385:
+			attLen = int(hexPacket[atts+4:atts+8],16)*2
+			attXAUTHValue = hexPacket[atts+8:atts+8+attLen]
+                        if self.debug > 0:				
+                                try:
+                                        print "Mode Config Attribute Type: %s (%s)"%(self.dicXAUTHAtts[str(attXAUTH)],attXAUTH)
+                                except:
+                                        print "Mode Config Attribute Type: Unknown (%s)"%attXAUTH
+                                print "Mode Config Attribute Length: %s"%attLen
+                                print "Mode Config Attribute Value: %s (%s)"%(attXAUTHValue.decode('hex'), attXAUTHValue)
+			if len(attXAUTHValue) == 8:
+                        	dicCrypto["MCFG_IPi"] = attXAUTHValue
+                        	ip = str(int(attXAUTHValue[:2], 16)) + "." + str(int(attXAUTHValue[2:4], 16)) + "." + str(int(attXAUTHValue[4:6], 16)) + "." + str(int(attXAUTHValue[6:8], 16))
+                                print "Received IP address: %s"%ip
+				atts += 8
 				
 		else:
                 	attLen = int(hexPacket[atts+4:atts+8],16)*2
@@ -334,7 +542,6 @@ class IKEv1Handler(object):
 					print "Mode Config Attribute Type: Unknown (%s)"%attXAUTH
 				print "Mode Config Attribute Length: %s"%attLen
 				print "Mode Config Attribute Value: %s (%s)"%(attXAUTHValue.decode('hex'), attXAUTHValue)
-
 			atts += attLen
 		atts += 8
 		attsXAUTH[attXAUTH] = attXAUTHValue
@@ -347,7 +554,6 @@ class IKEv1Handler(object):
 	payLen = int(hexPacket[prevPayLen+4:prevPayLen+8], 16)
         mcfgType = int(hexPacket[prevPayLen+8:prevPayLen+10], 16)#Padding with 2 bytes (reserved space) 
 	mcfgID = int(hexPacket[prevPayLen+12:prevPayLen+14], 16)
-	
 	mcfgAtt = hexPacket[prevPayLen+16:prevPayLen+(payLen * 2)]
         finByte = prevPayLen + (payLen * 2)
 	firstByte = prevPayLen+16
@@ -440,7 +646,7 @@ class IKEv1Handler(object):
 
         if self.debug > 0:
                 print "Parsing Delete Payload:"
-                print "Next Payload: %s"%self.dicPayloads[str(payNext)]
+	        print "Next Payload: %s"%self.dicPayloads[str(payNext)]
                 print "Payload Length: %s"%payLen
                 print "DOI: %s"%doi
                 print "Protocol ID: %s"%protID
@@ -450,28 +656,54 @@ class IKEv1Handler(object):
 
         return payNext,payLen,finByte
 
-    def parsePayload(self,hexPacket,nextPay,flags,finByte):
+    def parsePayload(self,hexPacket,nextPay,flags,finByte, phase):
 	#Process payload according to 'next payload' type received from previous payload
 	#Provide the hexlified packet data and the next payload, flag and final byte
 	while nextPay != 0:
 		if nextPay == 1:
 			#Process SA -> Proposal -> transform payloads
-			ikeSA = self.parseSA(hexPacket,finByte)
-                	finByte = ikeSA[-1]
-			SATransform = ikeSA[1]#will need to return the transform values eventually
-	                nextPay = ikeSA[0]
+			ikeSA = self.parseSA(hexPacket[finByte:], phase)
+                        if phase == 1:
+                                finByte = ikeSA[-1]
+                                SATransform = ikeSA[2]#will need to return the transform values eventually
+                                nextPay = ikeSA[0]
+                        if phase == 2:
+                                finByte = ikeSA[-1]+finByte
+                                SATransform = ikeSA[2]#will need to return the transform values eventually
+                                nextPay = ikeSA[0]
+                                spi = ikeSA[-2]
+				dicCrypto["p2spi"] = spi
+                                for l in SATransform[0]:
+                                        dicCrypto[l] = SATransform[0][l]
+
 			try:
 				dicCrypto["keyLen"] = SATransform["Key Length"]
-				pass
 			except:
 				pass
 
         	elif nextPay == 2:
-			print "Next Payload %s - Support for this payload is not supported yet"%self.dicPayloads[str(nextPay)]
-			exit()
+                        #Process Proposal -> transform payloads
+                        ikeProp = self.parseProposal(hexPacket[finByte:],phase)
+			if phase == 1:
+                        	finByte = ikeProp[-1]
+                        	SATransform = ikeProp[1]#will need to return the transform values eventually
+                        	nextPay = ikeProp[0]
+                        if phase == 2:
+                                finByte = ikeProp[-1]
+                                SATransform = ikeProp[1]#will need to return the transform values eventually
+                                nextPay = ikeProp[0]
+				spi = ikeProp[-3]
+				dicCrypto["p2spi"] = spi
+				for l in SATransform:
+					dicCrypto[l] = SATransform[l]
+                        try:
+                                dicCrypto["keyLen"] = SATransform["Key Length"]
+                                pass
+                        except:
+                                pass
 
         	elif nextPay == 3:
-			print "Next Payload %s - Support for this payload is not supported yet"%self.dicPayloads[str(nextPay)]
+			print "Next Payload %s - Support for multiple transform sets not added yet"%self.dicPayloads[str(nextPay)]
 			exit()
 
 		elif nextPay == 4:
@@ -484,17 +716,27 @@ class IKEv1Handler(object):
 
         	elif nextPay == 5:
 			#Process ID payload
-			ikeID = self.IDProcessing(hexPacket,finByte)
+			ikeID = self.parseID(hexPacket,finByte)
 			ID_r = ikeID[1]
 	                finByte = ikeID[-1]
         	        nextPay = ikeID[0]
 			dicCrypto["ID_r"] = ID_r
 
         	elif nextPay == 6:
-			print "Next Payload (%s) - Support for this payload is not supported yet"%self.dicPayloads[str(nextPay)]
+                        #Process Certificate payload
+                        ikeC = self.parseC(hexPacket,finByte)
+                        Cencoding = ikeC[1]
+                        Cdata = ikeC[2]
+                        finByte = ikeC[-1]
+                        nextPay = ikeC[0]
 
 	        elif nextPay == 7:
-			print "Next Payload (%s) - Support for this payload is not supported yet"%self.dicPayloads[str(nextPay)]
+                        #Process Certificate Request payload
+                        ikeCR = self.parseCR(hexPacket,finByte)
+                        CRencoding = ikeCR[1]
+                        CRdata = ikeCR[2]
+                        finByte = ikeCR[-1]
+                        nextPay = ikeCR[0]
 
         	elif nextPay == 8:
 			#Process Hash payload
@@ -505,8 +747,11 @@ class IKEv1Handler(object):
 			#Don't see the need to check for a valid hash yet
 
 	       	elif nextPay == 9:
-			print "Next Payload %s - Support for this payload is not supported yet"%self.dicPayloads[str(nextPay)]
-			exit()
+                        #Process Signature payload
+                        ikeSig = self.parseSig(hexPacket,finByte)
+                        ikeSigData = ikeSig[1]
+                        finByte = ikeSig[-1]
+                        nextPay = ikeSig[0]
 
 		elif nextPay == 10:
 			#Process Nonce payload
@@ -521,8 +766,9 @@ class IKEv1Handler(object):
                         ikeNot = self.parseNot(hexPacket,finByte)
                         finByte = ikeNot[-1]
                         nextPay = ikeNot[0]
+			notData = ikeNot[2]
 			dicCrypto["notmsgType"] = ikeNot[1]
-	
+			dicCrypto["notData"] = notData
         	elif nextPay == 12:
                         #Parse Delete payload
                         ikeNot = self.parseDel(hexPacket,finByte)
@@ -544,10 +790,26 @@ class IKEv1Handler(object):
                         finByte = ikeMCFG[-1]
                         nextPay = ikeMCFG[0]
 			dicCrypto["mcfgType"] = ikeMCFG[1]
+			#dicCrypto["MCFG_IPi"] = 0
+			#dicCrypto["MCFG_IPr"] = 0
 			attsXAUTH = ikeMCFG[-2]
 			for key, value in attsXAUTH.iteritems():
 				if key == 16527:
 					dicCrypto["XAUTH_STATUS"] = value
+				###***clean this up
+				#elif key == 16385 and value != 0:
+				#	dicCrypto["MCFG_IPi"] = value
+				elif key == 16385 and value == 0:
+					dicCrypto["MCFG_IPr"] = value
+				elif key == 16386:
+					dicCrypto["MCFG_subnet"] = value
+                elif nextPay == 15:
+                        #Process NAT-D payload
+                        ikeNATD = self.parseNATD(hexPacket,finByte)
+                        ikeNATDdata = ikeNATD[1]
+                        finByte = ikeNATD[-1]
+                        nextPay = ikeNATD[0]
+
                 elif nextPay == 20:
                         #Process NAT-D payload
                         ikeNATD = self.parseNATD(hexPacket,finByte)
@@ -564,10 +826,15 @@ class IKEv1Handler(object):
                 	nextPay = ikeVID[0]
 
 		else:
-			print "Error: Invalid 'next payload', something went wrong. Perhaps an invalid next payload type or support for this payload is not added yet?\nThis could also be caused by an invalid payload decryption due to invalid IV or key.\nMost common cause for this is multiple instances of the tool being run in short succession causing confusion. For now just wait 30-60 seconds and restart.\nDebug output:\n%s"%nextPay
+			print "Error: Invalid 'next payload', something went wrong. Perhaps an invalid next payload type or support for this payload is not added yet.\nThis is usually caused by an invalid payload decryption due to invalid IV or key.\nDebug output:\nNext Payload: %s"%nextPay
+			print "Whole packet: %s"%hexPacket
+			print "Crypto values: %s"%dicCrypto
+			###***remove exit from below to prevent bug? Maybe add break
+			###EDIT
+			
 			exit()
-
-	return self.retData
+			###/EDIT
+	return
 
 
     def main(self,hexPacket,encType,hashType,*args):
@@ -593,6 +860,11 @@ class IKEv1Handler(object):
 	msgID = ikeHDR[5]
 	payLen = ikeHDR[6]
 	flags = ikeHDR[7]
+	if xType == 32:
+		phase = 2
+	else:
+		phase = 1
+
 	if encType == "AES" or int(encType) == 7 or encType == "07":
 		IVlen = 32
 	else:
@@ -619,7 +891,7 @@ class IKEv1Handler(object):
         		ikePlain = ikeDecrypt.decrypt(rawencPayload).encode('hex')		
 			if self.debug > 0:
 				print "Decrypted payload: %s"%ikePlain
-			ikeHandling.parsePayload(ikePlain,nextPay,flags,0)
+			ikeHandling.parsePayload(ikePlain,nextPay,flags,0,phase)
 			p2IV = encPayload[len(encPayload)-IVlen:]
 			if self.debug > 0:
 				print "Phase 2 IV: %s"%p2IV
@@ -642,7 +914,7 @@ class IKEv1Handler(object):
 					print "Stripped decrypted payload: %s"%ikePlain
 				#Parse the plaintext payloads
 				if xType == "04" or xType ==4:
-                                	ikeHandling.parsePayload(ikePlain,nextPay,flags,0)
+                                	ikeHandling.parsePayload(ikePlain,nextPay,flags,0,phase)
                                 	dicCrypto["rCookie"] = rCookie
                                 	dicCrypto["xType"] = xType
                                 	dicCrypto["iCookie"] = iCookie
@@ -651,7 +923,7 @@ class IKEv1Handler(object):
 
 
 				elif xType == "05" or xType == 5:
-                                	ikeHandling.parsePayload(ikePlain,nextPay,flags,0)
+                                	ikeHandling.parsePayload(ikePlain,nextPay,flags,0,phase)
                                 	dicCrypto["rCookie"] = rCookie
                                 	dicCrypto["xType"] = xType
                                 	dicCrypto["iCookie"] = iCookie
@@ -659,12 +931,21 @@ class IKEv1Handler(object):
                                 	return dicCrypto,listVIDs
 
                         	elif xType == "06" or xType == 6:
-                                	ikeHandling.parsePayload(ikePlain,nextPay,flags,0)
+                                	ikeHandling.parsePayload(ikePlain,nextPay,flags,0,phase)
                                 	dicCrypto["rCookie"] = rCookie
                                 	dicCrypto["xType"] = xType
                                 	dicCrypto["iCookie"] = iCookie
                                 	dicCrypto["msgID"] = msgID
                                 	return dicCrypto
+
+                                elif xType == "32" or xType == 32:
+					ikeHandling.parsePayload(ikePlain,nextPay,flags,0,phase)
+                                        dicCrypto["rCookie"] = rCookie
+                                        dicCrypto["xType"] = xType
+                                        dicCrypto["iCookie"] = iCookie
+                                        dicCrypto["msgID"] = msgID
+                                        return dicCrypto
+
 
                         	else:
                                 	print "This exchange type %s is not included yet. Exiting..."%xType
@@ -672,13 +953,18 @@ class IKEv1Handler(object):
 
 			except Exception,e:
 				print "Decryption Failed with error: %s"%e
+				###***added debug output here for bug fix
 				traceback.print_exc()
+				###***brute mode breaks here when incorrect IV is used
+				###EDIT
 				exit()
+				#break
+				###/EDIT
 
 
 
 	if xType == "04" or xType ==4:
-		ikeHandling.parsePayload(hexPacket,nextPay,flags,finByte)
+		ikeHandling.parsePayload(hexPacket,nextPay,flags,finByte,phase)
                 dicCrypto["rCookie"] = rCookie
                 dicCrypto["xType"] = xType
                 dicCrypto["iCookie"] = iCookie
@@ -686,7 +972,7 @@ class IKEv1Handler(object):
 		return dicCrypto,listVIDs#Returns dictionary of useful value for crypto and state, Also a list of VIDs for fingerprinting in the first exchange packet.
 
 	elif xType == "05" or xType == 5:
-                ikeHandling.parsePayload(hexPacket,nextPay,flags,finByte)
+                ikeHandling.parsePayload(hexPacket,nextPay,flags,finByte,phase)
                 dicCrypto["rCookie"] = rCookie
                 dicCrypto["xType"] = xType
                 dicCrypto["iCookie"] = iCookie
@@ -694,7 +980,7 @@ class IKEv1Handler(object):
                 return dicCrypto,listVIDs
 
 	elif xType == "06" or xType == 6:
-                ikeHandling.parsePayload(hexPacket,nextPay,flags,finByte)
+                ikeHandling.parsePayload(hexPacket,nextPay,flags,finByte,phase)
                 dicCrypto["rCookie"] = rCookie
                 dicCrypto["xType"] = xType
                 dicCrypto["iCookie"] = iCookie

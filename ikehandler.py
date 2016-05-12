@@ -327,7 +327,6 @@ class IKEv1Handler(object):
 	elif phase == 2:
 		propHdrSize = ikeProp[-3]
 		spi = ikeProp[-2]
-	###**this bit could be written better, can't remember if the extra 24 in phase 1 is the sa header?
 	if phase == 1:
 		finByte = payLen*2 + propHdrSize + 16 + 24
 		return payNextSA,payNext,transform,payLen,finByte
@@ -831,7 +830,6 @@ class IKEv1Handler(object):
 			print "Crypto values: %s"%dicCrypto
 			###***remove exit from below to prevent bug? Maybe add break
 			###EDIT
-			
 			exit()
 			###/EDIT
 	return

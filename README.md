@@ -30,36 +30,42 @@ USAGE
 
 **Options:**   
                         
-	  -h, --help            show this help message and exit
-	  -w WORDLIST, --wordlist=WORDLIST
-	                        Path to wordlist file
-	  -t TRANS, --trans=TRANS
-	                        [OPTIONAL] Transform set: encryption type, hash type,
-	                        authentication type, dh group (5 1 1 2)
-	  -e, --enum            Set Enumeration Mode
-	  -b, --brute           Set XAUTH Brute Force Mode
-	  -k PSK, --psk=PSK     Pre Shared Key to be used with Brute Force Mode
-	  -i ID, --id=ID        ID or group name. To be used with Brute Force Mode
-	  -u USERNAME, --username=USERNAME
-	                        XAUTH username to be used with Brute Force Mode
-	  -U USERLIST, --userlist=USERLIST
-	                        [OPTIONAL] XAUTH username list to be used with Brute
-	                        Force Mode
-	  -p PASSWORD, --password=PASSWORD
-	                        XAUTH password to be used with Connect Mode
-	  --sport=SPORT         Source port to use, default is 500
-	  -d, --debug           Set debug on
-	  -c, --connect         Set Connect Mode (test a connection)
-	  -y IDTYPE, --idtype=IDTYPE
-	                        [OPTIONAL] ID Type for Identification payload. Default
-	                        is 2 (FQDN)
-	  -s SPEED, --speed=SPEED
-	                        [OPTIONAL] Speed of guessing attempts. A numerical
-	                        value between 1 - 5 where 1 is faster and 5 is slow.
-	                        Default is 3
-	  -l KEYLEN, --keylen=KEYLEN
-	                        [OPTIONAL] Key Length, for use with AES encryption
-	                        types
+  -h, --help            show this help message and exit
+  -w WORDLIST, --wordlist=WORDLIST
+                        Path to wordlist file
+  -t TRANS, --trans=TRANS
+                        [OPTIONAL] Transform set: encryption type, hash type,
+                        authentication type, dh group (5 1 1 2)
+  -e, --enum            Set Enumeration Mode
+  -a, --all             Set Transform Set Enumeration Mode
+  -b, --brute           Set XAUTH Brute Force Mode
+  -k PSK, --psk=PSK     Pre Shared Key to be used with Brute Force Mode
+  -i ID, --id=ID        ID or group name. To be used with Brute Force Mode
+  -u USERNAME, --username=USERNAME
+                        XAUTH username to be used with Brute Force Mode
+  -U USERLIST, --userlist=USERLIST
+                        [OPTIONAL] XAUTH username list to be used with Brute
+                        Force Mode
+  -p PASSWORD, --password=PASSWORD
+                        XAUTH password to be used with Connect Mode
+  --sport=SPORT         Source port to use, default is 500
+  -d, --debug           Set debug on
+  -c, --connect         Set Connect Mode (test a connection)
+  -y IDTYPE, --idtype=IDTYPE
+                        [OPTIONAL] ID Type for Identification payload. Default
+                        is 2 (FQDN)
+  -s SPEED, --speed=SPEED
+                        [OPTIONAL] Speed of guessing attempts. A numerical
+                        value between 1 - 5 where 1 is faster and 5 is slow.
+                        Default is 3
+  -l KEYLEN, --keylen=KEYLEN
+                        [OPTIONAL] Key Length, for use with AES encryption
+                        types
+  -v VENDOR, --vendor=VENDOR
+                        [OPTIONAL] Vendor Type (cisco or watchguard currently
+                        accepted)
+  --version=VERSION     [OPTIONAL] IKE verison (default verison 1)
+
                         
 **Transform Set Helper (Non-exhautive):**
 
@@ -79,9 +85,19 @@ USAGE
 TO DO
 =====
 
-- [ ] add rsa, hybrid etc support
-- [ ] edit the packet processing to be more specific to milestones instead of just going by the number of packets in the received box
-- [ ] add RADIUS support and add exception for OTP until it's supported
-- [ ] add multiple transform sets to first packet to catch more device responses, particularly fqdn_user_id (03) and fqdn (02)
-- [ ] add xauth brute force mode for watchguard devices, currently doesn't work
+- [x] add rsa, hybrid etc support
+- [x] edit the packet processing to be more specific to milestones instead of just going by the number of packets in the received box
+- [x] add RADIUS support and add exception for OTP until it's supported
+- <s>[ ] add-multiple-transform-sets   to first packet to catch more device responses, particularly fqdn_user_id (03) and fqdn (02)</s>
+- [x] add xauth brute force mode for watchguard devices, currently doesn't work
 
+
+Version 0.1
+=====
++ Improved timeout in enum mode
++ Fixed server exit trace errors
++ Added automated transform set enumeration using the -a flag
++ Improved transform code and several other parts of the client/handler code.
++ Improved/added full connect more (-c) which allows to negotiated a full IPSEC connection, providing the keys to use for ESP 
++ Fixed a bug in brute mode
++ Added a check for XAUTH bypass (CVE-2015-0760)

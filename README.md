@@ -96,6 +96,6 @@ Version 0.1
 + Fixed server exit trace errors
 + Added automated transform set enumeration using the -a flag
 + Improved transform code and several other parts of the client/handler code.
-+ Improved/added full connect more (-c) which allows to negotiation of a full IPSEC connection, providing the keys to use for ESP 
++ Improved/added full connect mode (-c) which allows to negotiation of a full IPSEC connection. The ESP keys are provided after successful negotiation
 + Fixed a bug in brute mode
 + Added a check for XAUTH bypass (CVE-2015-0760)

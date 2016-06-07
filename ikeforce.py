@@ -547,7 +547,6 @@ if __name__ == '__main__':
 								print "[-]Not vulnerable to multiple response group name enumeration. Device is fully patched. Exiting...\n"
 								exit()
 							else:
-								print len(packets) + len(dupPackets)
 								print "[+]Device is vulnerable to multiple response group name enumeration"
 								enumType = "Cisco2"
 								break

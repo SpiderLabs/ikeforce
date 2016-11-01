@@ -7,29 +7,29 @@ INTRODUCTION
 
 IKEForce is a command line IPSEC VPN brute forcing tool for Linux that allows group name/ID enumeration and XAUTH brute forcing capabilities.  
 Guides can be found here:  
-http://blog.spiderlabs.com/2013/03/cracking-ike-aggressive-mode-hashes-part-1.html  
-http://blog.spiderlabs.com/2013/04/cracking-ike-missionimprobable-part-2.html  
-http://blog.spiderlabs.com/2014/09/cracking-ike-missionimprobable-part3.html  
+* http://blog.spiderlabs.com/2013/03/cracking-ike-aggressive-mode-hashes-part-1.html  
+* http://blog.spiderlabs.com/2013/04/cracking-ike-missionimprobable-part-2.html  
+* http://blog.spiderlabs.com/2014/09/cracking-ike-missionimprobable-part3.html  
 
 
 INSTALL
 =======
-Requires the pyip, crypto and openssl modules installed, but other than that it's only standard libs.
-pyip is the most likely lib that you won't have, install it with 'pip install pyip'
+Requires the `pyip`, `pycrypto` and `pyopenssl` modules installed, but other than that it's only standard libs.
+`pyip` is the most likely lib that you won't have, install it with 'pip install pyip'
 
 USAGE
 =====
 
-./ikeforce.py [target] [mode] -w /path-to/wordlist.txt [optional] -t 5 1 1 2  
+`./ikeforce.py [target] [mode] -w /path-to/wordlist.txt [optional] -t 5 1 1 2`
 
 **Example (find *all* AM transforms):**  
-./ikeforce.py 192.168.1.110 -a -s 1 
+`./ikeforce.py 192.168.1.110 -a -s 1`
 
 **Example (enum mode):**  
-./ikeforce.py 192.168.1.110 -e -w groupnames.txt -s 1  
+`./ikeforce.py 192.168.1.110 -e -w groupnames.txt -s 1`
 
 **Example (brute mode):**  
-./ikeforce.py 192.168.1.110 -b -i groupid -u dan -k psk123 -w passwords.txt -s 1  
+`./ikeforce.py 192.168.1.110 -b -i groupid -u dan -k psk123 -w passwords.txt -s 1`
 
 **Options:**   
                     

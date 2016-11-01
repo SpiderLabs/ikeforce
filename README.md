@@ -89,6 +89,7 @@ USAGE
 |6 = CAST       |6 = SHA2-512  |64221 = Hybrid Mode       |                            |
 |7 = AES        |              |65001 = XAUTHInitPreShared|                            |
 
+Have a look at the [ike-scan User Guide](http://www.nta-monitor.com/wiki/index.php/Ike-scan_User_Guide#Encryption_Algorithm_Values) for more values.
 
 Version 0.1
 =====

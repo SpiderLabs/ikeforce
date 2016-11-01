@@ -283,7 +283,7 @@ if __name__ == '__main__':
 	    if all:
 		IDdata = "ANYID"
 		ikeneg = ikeclient.IKEv1Client(debug)
-		ikeCrypto = crypto.ikeCrypto()
+		ikeCrypto = ikecrypto.ikeCrypto()
 		print "[+]Checking for acceptable Transforms\n"
 		print "============================================================================================\nAccepted (AM) Transform Sets\n============================================================================================"
 		#Temporary dictionary of DH groups currently supported by IKEForce. This will probably be permanent as most hosts that use AM will not be able to or will be not be bothered to use large primes ;)
@@ -368,7 +368,7 @@ if __name__ == '__main__':
 		    IDdata = "thiSIDDoesnotexit33349204"
 		    psk = "anypskthatdoesnotexistfhfhssi575"
 		    ikeneg = ikeclient.IKEv1Client(debug)
-		    ikeCrypto = crypto.ikeCrypto()
+		    ikeCrypto = ikecrypto.ikeCrypto()
 		    print "[+]Checking for possible enumeration techniques"
 		    if len(packets) == 0:
 			if debug > 0:
@@ -860,7 +860,7 @@ if __name__ == '__main__':
                wordcount += 1
              wordsfile.seek(0)
 	     ikeneg = ikeclient.IKEv1Client(debug)
-	     ikeCrypto = crypto.ikeCrypto()
+	     ikeCrypto = ikecrypto.ikeCrypto()
 	     if userlist != None:
 	      for u in userlist:
 		usercount += 1

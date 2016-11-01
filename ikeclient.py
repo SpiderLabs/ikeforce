@@ -216,7 +216,7 @@ class IKEv1Client(object):
 		lifeDur = "000c0004" + str(ld) # need to handle this better
 
         	try:
-        	        strPayload = payNext+padding+transNum+transID+padding1+encTypehashType+authtype+groupType+lifeType+lifeDur+keyLen
+        	        strPayload = payNext+padding+transNum+transID+padding1+encType+hashType+authType+groupType+lifeType+lifeDur+keyLen
         	except:
         	        strPayload = payNext+padding+transNum+transID+padding1+encType+hashType+authType+groupType+lifeType+lifeDur
 

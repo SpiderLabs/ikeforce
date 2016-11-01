@@ -7,7 +7,7 @@
 
 import traceback
 import sys
-import crypto
+import ikecrypto
 
 #IKE/ISAKMP packet handler classes
 #Declare global dictionary and list for VIDs and crypto operations

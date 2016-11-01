@@ -11,7 +11,7 @@ import sys,threading,time,SocketServer,struct,array,select,socket
 import ikeclient
 import dh
 import ikehandler
-import crypto
+import ikecrypto
 import vid
 from optparse import OptionParser
 from termios import tcflush, TCIOFLUSH

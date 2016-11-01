@@ -13,7 +13,7 @@ except:
         exit()
 import array
 import dh
-import crypto
+import ikecrypto
 
 #IKE/ISAKMP client classes
 ###***get rid of this

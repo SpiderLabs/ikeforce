@@ -6,6 +6,7 @@
 #You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import socket,OpenSSL,sys,struct
+import os
 try:
         import udp
 except:
@@ -43,7 +44,7 @@ class IKEv1Client(object):
     def secRandom(self, bytes):
 	#Creates selected number of random bytes
 	#Provide the number of bytes required as input, method will return raw bytes
-	randomBytes = OpenSSL.rand.bytes(bytes)
+	randomBytes = os.urandom(bytes)
 	return randomBytes
 
     def payBuild(self, strPayload, lenLen, *arg):

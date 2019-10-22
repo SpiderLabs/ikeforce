@@ -28,7 +28,7 @@ USAGE
 `./ikeforce.py 192.168.1.110 -a -s 1`
 
 **Example (enum mode):**  
-`./ikeforce.py 192.168.1.110 -e -w groupnames.txt -s 1`
+`./ikeforce.py 192.168.1.110 -e -w wordlists/groupnames.dic -s 1`
 
 **Example (brute mode):**  
 `./ikeforce.py 192.168.1.110 -b -i groupid -u dan -k psk123 -w passwords.txt -s 1`
